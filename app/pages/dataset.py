@@ -13,16 +13,20 @@ def get_total_rows(path: str) -> int:
     ext = os.path.splitext(path)[1].lower()
     if ext == ".xlsx":
         return len(pd.read_excel(path, usecols=[0]))
+    elif ext == ".zip":
+        return len(pd.read_csv(path, usecols=[0], compression="zip"))
     else:
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             return sum(1 for _ in f) - 1
-
 
 @st.cache_data
 def load_dataset(path: str, nrows=None) -> pd.DataFrame:
     ext = os.path.splitext(path)[1].lower()
     if ext == ".xlsx":
         return pd.read_excel(path, nrows=nrows)
+    elif ext == ".zip":
+        # pandas bisa baca CSV di dalam zip langsung
+        return pd.read_csv(path, nrows=nrows, compression="zip")
     else:
         return pd.read_csv(path, nrows=nrows)
 
@@ -31,12 +35,12 @@ def load_dataset(path: str, nrows=None) -> pd.DataFrame:
 def load_all_files() -> dict:
     csvs  = sorted(glob.glob(os.path.join(DATASET_DIR, "*.csv")))
     xlsxs = sorted(glob.glob(os.path.join(DATASET_DIR, "*.xlsx")))
+    zips  = sorted(glob.glob(os.path.join(DATASET_DIR, "*.zip")))   # ← tambah ini
     result = {}
-    for path in csvs + xlsxs:
+    for path in csvs + xlsxs + zips:                                 # ← tambah zips
         fname = os.path.basename(path)
         result[fname] = load_dataset(path, nrows=None)
     return result
-
 
 @st.cache_data
 def merge_all(dfs: dict) -> pd.DataFrame:
