@@ -8,25 +8,38 @@ DATASET_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."
 
 
 # ── Cache & Data Loading ───────────────────────────────────────────────────────
+
+
 @st.cache_data
 def get_total_rows(path: str) -> int:
     ext = os.path.splitext(path)[1].lower()
     if ext == ".xlsx":
         return len(pd.read_excel(path, usecols=[0]))
     elif ext == ".zip":
-        return len(pd.read_csv(path, usecols=[0], compression="zip"))
+        import zipfile
+        with zipfile.ZipFile(path, "r") as z:
+            csv_files = [f for f in z.namelist() if f.endswith(".csv")]
+            if not csv_files:
+                return 0
+            with z.open(csv_files[0]) as f:
+                return sum(1 for _ in f) - 1
     else:
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             return sum(1 for _ in f) - 1
-
 @st.cache_data
 def load_dataset(path: str, nrows=None) -> pd.DataFrame:
     ext = os.path.splitext(path)[1].lower()
     if ext == ".xlsx":
         return pd.read_excel(path, nrows=nrows)
     elif ext == ".zip":
-        # pandas bisa baca CSV di dalam zip langsung
-        return pd.read_csv(path, nrows=nrows, compression="zip")
+        import zipfile
+        with zipfile.ZipFile(path, "r") as z:
+            # Ambil file CSV pertama yang ada di dalam zip
+            csv_files = [f for f in z.namelist() if f.endswith(".csv")]
+            if not csv_files:
+                raise ValueError(f"Tidak ada file CSV di dalam {path}")
+            with z.open(csv_files[0]) as f:
+                return pd.read_csv(f, nrows=nrows)
     else:
         return pd.read_csv(path, nrows=nrows)
 
