@@ -45,12 +45,12 @@ def load_all_files() -> dict:
 @st.cache_data
 def merge_all(dfs: dict) -> pd.DataFrame:
     key_map = {
-        ("stores.csv",          "train.zip"):           ["store_nbr"],
-        ("train.zip",           "transactions.csv"):    ["date", "store_nbr"],
-        ("train.zip",           "oil.csv"):             ["date"],
-        ("train.zip",           "holidays_events.csv"): ["date"],
+        ("stores.csv",          "train.csv"):           ["store_nbr"],
+        ("train.csv",           "transactions.csv"):    ["date", "store_nbr"],
+        ("train.csv",           "oil.csv"):             ["date"],
+        ("train.csv",           "holidays_events.csv"): ["date"],
     }
-    ORDER = ["train.zip", "stores.csv", "transactions.csv", "oil.csv", "holidays_events.csv"]
+    ORDER = ["train.csv", "stores.csv", "transactions.csv", "oil.csv", "holidays_events.csv"]
 
     base_name = next((n for n in ORDER if n in dfs), list(dfs.keys())[0])
     merged    = dfs[base_name].copy()
@@ -95,27 +95,27 @@ def _show_erd():
     import plotly.graph_objects as go
 
     schemas = {
-        "train.zip":           {"kolom": ["date","store_nbr","family","sales","onpromotion"],             "pk": [],            "fk": ["store_nbr","date","family"], "color": "#38bdf8"},
+        "train.csv":           {"kolom": ["date","store_nbr","family","sales","onpromotion"],             "pk": [],            "fk": ["store_nbr","date","family"], "color": "#38bdf8"},
         "stores.csv":          {"kolom": ["store_nbr","city","state","type","cluster"],                    "pk": ["store_nbr"], "fk": [],                            "color": "#34d399"},
         "oil.csv":             {"kolom": ["date","dcoilwtico"],                                            "pk": ["date"],      "fk": [],                            "color": "#fb923c"},
         "holidays_events.csv": {"kolom": ["date","type","locale","locale_name","description","transferred"],"pk": [],           "fk": ["date"],                      "color": "#818cf8"},
         "transactions.csv":    {"kolom": ["date","store_nbr","transactions"],                              "pk": [],            "fk": ["date","store_nbr"],          "color": "#f472b6"},
     }
     positions = {
-        "train.zip":           (0.5, 0.5),
+        "train.csv":           (0.5, 0.5),
         "stores.csv":          (0.0, 0.5),
         "oil.csv":             (0.5, 1.0),
         "holidays_events.csv": (1.0, 1.0),
         "transactions.csv":    (0.0, 1.0),
     }
     relations = [
-        ("stores.csv",          "train.zip",           "store_nbr"),
+        ("stores.csv",          "train.csv",           "store_nbr"),
         ("stores.csv",          "transactions.csv",    "store_nbr"),
-        ("oil.csv",             "train.zip",           "date"),
+        ("oil.csv",             "train.csv",           "date"),
         ("oil.csv",             "transactions.csv",    "date"),
         ("oil.csv",             "holidays_events.csv", "date"),
-        ("holidays_events.csv", "train.zip",           "date"),
-        ("transactions.csv",    "train.zip",           "date, store_nbr"),
+        ("holidays_events.csv", "train.csv",           "date"),
+        ("transactions.csv",    "train.csv",           "date, store_nbr"),
     ]
 
     edge_x, edge_y, annotations = [], [], []
